@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  django:
+    build:
+      ./backend
+    env_file:
+      - ./secrets/ocr.env
+    volumes:
+    - ./backend:/backend
+    command: ./start.sh
+    restart:
+      always
+    ports:
+      - "9060:8000"
