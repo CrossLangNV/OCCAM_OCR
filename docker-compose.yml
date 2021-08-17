@@ -6,8 +6,9 @@ services:
       ./backend
     env_file:
       - ./secrets/ocr.env
-    volumes:
-    - ./backend:/backend
+### We already copy the folder. Also, ./start.sh can't be run from volume mapping.
+#    volumes:
+#      - ./backend:/backend
     command: ./start.sh
     restart:
       always

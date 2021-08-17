@@ -11,7 +11,7 @@ class ImageFile(models.Model):
 
 class ImageFolder(models.Model):
     title = models.CharField(max_length=225)
-    folder = models.FileField(blank=False, null=False)
+    folder = models.ImageField(blank=False, null=False)
 
     def __str__(self):
         return self.folder.name

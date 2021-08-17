@@ -1,28 +1,19 @@
+import os
+import sys
+
+from django.conf import settings
+from rest_framework import generics
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics
-from rest_framework import status
 
-from django.conf import settings
-
+from .models import ImageFile, ImageFolder, LayoutModel, OCRModel, OCRImage, OCRFolder
 from .serializers import ImageFileSerializer, ImageFolderSerializer, LayoutModelSerializer, OCRModelSerializer, \
     OCRImageSerializer, OCRFolderSerializer
-from .models import ImageFile, ImageFolder, LayoutModel, OCRModel, OCRImage, OCRFolder
-
-import os
-import sys
-import cv2
-import zipfile
-import json
-import glob
 
 sys.path.append(os.path.join(settings.BASE_DIR, "pero_ocr_app/pero-ocr/"))
-from pero_ocr.document_ocr.layout import PageLayout
-from pero_ocr.document_ocr.page_parser import PageParser
 
 from pero_ocr_app.ocr_models.ocr import OCRViewShared
-from pero_ocr_app.ocr_models.configuration import configuration_pero_ocr
 
 
 class ImageFileUploadView(generics.ListCreateAPIView):
@@ -71,12 +62,10 @@ class OCRModelUploadDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class OCRView(generics.CreateAPIView,
               OCRViewShared):
-
     serializer_class = OCRImageSerializer
     queryset = OCRImage.objects.all()
 
     def post(self, request, *args, **kwargs):
-
         self.check_post_input(request)
 
         # 0) Init models &
@@ -92,7 +81,6 @@ class OCRView(generics.CreateAPIView,
         return Response(return_data)
 
     def init_data(self, request):
-
         key = 'image_file' if 1 else 'id_image'
 
         id_image = request.data.get(key, None)
@@ -105,7 +93,6 @@ class OCRView(generics.CreateAPIView,
 
 class OCRFolderView(generics.CreateAPIView,
                     OCRViewShared):
-
     serializer_class = OCRFolderSerializer
     queryset = OCRFolder.objects.all()
 

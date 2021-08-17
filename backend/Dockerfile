@@ -67,7 +67,7 @@ RUN pip install Cython==0.29.15 \
                 ipython \
                 jupyter
 
-# Set the working directory to /django
+# Set the working directory to e.g. /django
 WORKDIR /backend
 
 # Copy App
