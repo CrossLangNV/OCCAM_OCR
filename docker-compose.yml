@@ -6,11 +6,17 @@ services:
       ./backend
     env_file:
       - ./secrets/ocr.env
-### We already copy the folder. Also, ./start.sh can't be run from volume mapping.
-#    volumes:
-#      - ./backend:/backend
+    ### We already copy the folder. Also, ./start.sh can't be run from volume mapping.
+    #volumes:
+    #  - ./backend:/backend
     command: ./start.sh
     restart:
       always
     ports:
       - "9060:8000"
+
+    runtime: nvidia
+    environment:
+      - "DEVICE=cuda:0"
+      # Only the second one on Turing
+      - "NVIDIA_VISIBLE_DEVICES=1"
