@@ -43,6 +43,7 @@ def get_engine(config, *args, **kwargs):
 
 
 def configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name):
+    # TODO Get from config.ini instead
     # 1) Configuration of PERO-OCR:
 
     config = configparser.ConfigParser()
@@ -58,7 +59,6 @@ def configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name)
                               }
 
     # configuration of layout_model:
-
     layout_json_path = glob.glob(os.path.join(settings.MEDIA_ROOT, layout_model_name, "*.json"))
 
     try:
@@ -98,3 +98,10 @@ def configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name)
     config['OCR'] = {'OCR_JSON': ocr_json_path}
 
     return config
+
+
+def get_page_layout_text(page_layout):
+    text = ""
+    for line in page_layout.lines_iterator():
+        text += "{}\n".format(line.transcription)
+    return text

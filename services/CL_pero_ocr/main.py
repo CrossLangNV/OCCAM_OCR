@@ -1,16 +1,12 @@
-import traceback
+import os
+import subprocess
+import tempfile
 from typing import Optional
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from pero_ocr.document_ocr.layout import PageLayout
+from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
-from scripts.dump import get_image, get_engine, image_folder_name, layout_model_name, ocr_model_name, \
-    configuration_pero_ocr
 
 app = FastAPI()
-
-config = configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name)
-page_parser, engine_name, engine_version = get_engine(config=config, headers=None, engine_id=None)
 
 
 class OCRResult(BaseModel):
@@ -19,7 +15,12 @@ class OCRResult(BaseModel):
     text: Optional[str] = None
 
 
-@app.post("/ocr",
+"""
+The model gets loaded with every call, by calling OCR as a user-scripts 
+"""
+
+
+@app.post("/ocr/",
           response_model=OCRResult
           )
 async def ocr_image(
@@ -27,33 +28,25 @@ async def ocr_image(
 ):
     filename = image.filename
 
-    print('-- Load image --')
-    contents = await image.read()
-    img = get_image(contents)
+    with tempfile.TemporaryDirectory() as dirpath:
+        filename_image_tmp = os.path.join(dirpath, filename)
+        with open(filename_image_tmp, 'wb') as f_image:
+            f_image.write(await image.read())
 
-    print('-- Process image --')
-    # Process image
-    try:
-        page_layout = PageLayout(id=filename,
-                                 page_size=img.shape[:2],
-                                 )
+        filename_xml = os.path.join(dirpath, 'page.xml')
+        filename_txt = os.path.join(dirpath, 'page.txt')
 
-        page_layout = page_parser.process_page(img, page_layout)
+        subprocess.run(['python', '-m', 'scripts.run_foo',
+                        '-f', filename_image_tmp,
+                        '-x', filename_xml,
+                        '-t', filename_txt
+                        ])
 
-    except:
-        exception = traceback.format_exc()
-        raise HTTPException(status_code=420,
-                            detail=exception
-                            )
+        with open(filename_xml) as f:
+            xml = f.read()
 
-    def get_page_layout_text(page_layout):
-        text = ""
-        for line in page_layout.lines_iterator():
-            text += "{}\n".format(line.transcription)
-        return text
-
-    xml = page_layout.to_pagexml_string()
-    text = get_page_layout_text(page_layout)
+        with open(filename_txt) as f:
+            text = f.read()
 
     result = OCRResult(xml=xml,
                        name=filename,
