@@ -1,8 +1,11 @@
+import traceback
+from typing import Optional
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pero_ocr.document_ocr.layout import PageLayout
-import traceback
-
-from scripts.dump import get_image, get_engine, image_folder_name, layout_model_name, ocr_model_name, configuration_pero_ocr
+from pydantic import BaseModel
+from scripts.dump import get_image, get_engine, image_folder_name, layout_model_name, ocr_model_name, \
+    configuration_pero_ocr
 
 app = FastAPI()
 
@@ -10,8 +13,14 @@ config = configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_
 page_parser, engine_name, engine_version = get_engine(config=config, headers=None, engine_id=None)
 
 
+class OCRResult(BaseModel):
+    name: Optional[str] = None
+    xml: str
+    text: Optional[str] = None
+
+
 @app.post("/ocr",
-          # response_model=XMLTransOut
+          response_model=OCRResult
           )
 async def ocr_image(
         image: UploadFile = File(...)
@@ -26,7 +35,7 @@ async def ocr_image(
     # Process image
     try:
         page_layout = PageLayout(id=filename,
-                                 page_size = img.shape[:2],
+                                 page_size=img.shape[:2],
                                  )
 
         page_layout = page_parser.process_page(img, page_layout)
@@ -37,6 +46,17 @@ async def ocr_image(
                             detail=exception
                             )
 
-    xml = page_layout.to_pagexml_string()
+    def get_page_layout_text(page_layout):
+        text = ""
+        for line in page_layout.lines_iterator():
+            text += "{}\n".format(line.transcription)
+        return text
 
-    return xml
+    xml = page_layout.to_pagexml_string()
+    text = get_page_layout_text(page_layout)
+
+    result = OCRResult(xml=xml,
+                       name=filename,
+                       text=text)
+
+    return result
