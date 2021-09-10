@@ -1,11 +1,16 @@
 import argparse
+import configparser
 import os
 
 from pero_ocr.document_ocr.layout import PageLayout
+from pero_ocr.document_ocr.page_parser import PageParser
 
-from src.dump import get_image, configuration_pero_ocr, image_folder_name, layout_model_name, get_engine, \
+from configs.parser import configuration_pero_ocr
+from src.dump import get_image, image_folder_name, layout_model_name, get_engine, \
     ocr_model_name, get_page_layout_text
 
+
+ROOT = os.path.join(os.path.dirname(__file__), '..')
 
 def get_args():
     """
@@ -22,20 +27,30 @@ def get_args():
     return args
 
 
-def main():
-    args = get_args()
-
-    filename = args.filename
-    filename_xml = args.xml
-    filename_txt = args.txt
-
+def main(filename,
+         filename_xml,
+         filename_txt):
     with open(filename, 'rb') as f_image:
         img = get_image(f_image.read())
 
     id = os.path.split(filename)[-1]
 
-    config = configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name)
-    page_parser, engine_name, engine_version = get_engine(config=config, headers=None, engine_id=None)
+    if 0:
+        config = configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name)
+        config_path= None
+    elif 1:
+        # test_layout_model + test_ocr_model
+        config = configparser.ConfigParser()
+        config_path = os.path.join(ROOT, 'configs/config_test.ini')
+        config.read(config_path)
+    else:
+        config = configparser.ConfigParser()
+        config_path = os.path.join(ROOT, 'configs/config_eu_cz_printed_newspapers_2010.ini')
+        config.read(config_path)
+
+    page_parser = PageParser(config,
+                             #config_path=config_path # TODO make work with the relative paths from the config.
+                             )
 
     page_layout = PageLayout(id=id,
                              page_size=img.shape[:2],
@@ -54,4 +69,13 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    args = get_args()
+
+    filename = args.filename
+    filename_xml = args.xml
+    filename_txt = args.txt
+
+    main(filename,
+         filename_xml,
+         filename_txt
+         )

@@ -5,7 +5,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from pero_ocr.document_ocr.layout import PageLayout
 from pydantic import BaseModel
 
-from src.dump import get_image, configuration_pero_ocr, image_folder_name, layout_model_name, get_engine, ocr_model_name
+from src.dump import get_image, image_folder_name, layout_model_name, get_engine, ocr_model_name
+from configs.parser import configuration_pero_ocr
 
 app = FastAPI()
 
