@@ -1,0 +1,4 @@
+# all model folders
+media/*/
+# All content in output_dir
+output_dir/*/
