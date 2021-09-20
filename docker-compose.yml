@@ -31,5 +31,6 @@ services:
     environment:
       - MODULE_NAME=main
       - "DEVICE=cuda:0"
-      # Only the second one on Turing
-      - "NVIDIA_VISIBLE_DEVICES=1"
+      - "NVIDIA_VISIBLE_DEVICES=0"
+      # When using Turing, use second GPU
+      # - "NVIDIA_VISIBLE_DEVICES=1"
