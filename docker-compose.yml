@@ -1,36 +1,35 @@
 version: '3'
 
 services:
-#  django:
-#    build: ./backend
-#    env_file:
-#      - ./secrets/ocr.env
-#    ### We already copy the folder. Also, ./start.sh can't be run from volume mapping.
-#    volumes:
-#      - ./backend:/backend
-#    command: ./start.sh
-#    restart:
-#      always
-#    ports:
-#      - "9060:8000"
-#    runtime: nvidia
-#    environment:
-#      - "DEVICE=cuda:0"
-#      # Only the second one on Turing
-#      - "NVIDIA_VISIBLE_DEVICES=1"
-
-  pero-ocr-api:
-    build: ./services/CL_pero_ocr
+  pero-ocr-0.4:
+    build: ./services/CL_pero_ocr_0_4
     volumes:
-      - ./services/CL_pero_ocr:/app
+      - ./services/CL_pero_ocr_0_4:/app
     ports:
       - 9065:80
-#    env_file:
-#      - ./secrets/occam.env
+    env_file:
+      - ./secrets/ocr.env
     runtime: nvidia
     environment:
       - MODULE_NAME=main
       - "DEVICE=cuda:0"
-      - "NVIDIA_VISIBLE_DEVICES=0"
+      # - "NVIDIA_VISIBLE_DEVICES=0"
       # When using Turing, use second GPU
-      # - "NVIDIA_VISIBLE_DEVICES=1"
+      - "NVIDIA_VISIBLE_DEVICES=1"
+
+  pero-ocr-new:
+    build: services/CL_pero_ocr_new
+    volumes:
+      - ./CL_pero_ocr_new:/app
+    ports:
+      - 9075:80
+    env_file:
+      - ./secrets/ocr.env
+    # Enable again when on server with GPU
+    # runtime: nvidia
+    environment:
+      - MODULE_NAME=main
+      - "DEVICE=cuda:0"
+      # - "NVIDIA_VISIBLE_DEVICES=0"
+      # When using Turing, use second GPU
+      - "NVIDIA_VISIBLE_DEVICES=1"

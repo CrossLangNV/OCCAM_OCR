@@ -5,9 +5,10 @@ import unittest
 import requests
 
 if 0:
-    URL_HOME = 'http://localhost:9065'  # Local
+    URL_HOME = 'http://192.168.105.41:9065'  # Turing
 else:
-    URL_HOME = 'http://192.168.105.41:9065'  # GPU server
+    URL_HOME = 'http://gpu1.crosslang.com:9065'  # GPU1
+
 FILENAME_IMAGE = os.path.join(os.path.dirname(__file__), 'test image.jpg')
 FILENAME_IMAGE2 = os.path.join(os.path.dirname(__file__), 'test image handwritten.jpg')
 

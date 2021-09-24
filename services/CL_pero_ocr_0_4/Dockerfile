@@ -4,12 +4,8 @@ FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 RUN apt-get update && \
     apt-get install -y \
     git \
-    curl \
-    libgtk2.0-dev
-#    libglib2.0-0 \
-#    libsm6 \
-#    libxrender1 \
-#    libxext6
+    curl
+
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
@@ -26,20 +22,27 @@ RUN conda update -y conda
 
 RUN conda install -y python=3.7 && conda install -y pip
 
-#COPY ./requirements.txt ./
-#RUN pip install --no-cache-dir -r requirements.txt
+COPY ./requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# PERO-OCR 15/09/2021
-RUN pip install git+git://github.com/DCGM/pero-ocr.git@8b20f2927b73b9398ed86c7a5843720b86da06b6
+# RUN pip install pero-ocr==0.4 --ignore-installed tensorflow-gpu
+# PERO-OCR
+RUN pip install git+git://github.com/DCGM/pero-ocr.git@ade605d751c1bae076aa1327861d3f2ea44a5c05
 
-RUN conda install -y -c conda-forge hdbscan==0.8.26
-RUN pip install opencv-python==4.2.0.32
-RUN pip install torchvision
+## Copy dependencies
+#COPY ./API/translation/ /app/API/translation
+## Copy all the subdirs.
+#COPY ./CEF-eTranslation_connector/ /app
+#COPY ./multilingual_pageXML/ /app/multilingual_pageXML
+
+RUN conda install -y -c conda-forge opencv==4.2.0 && \
+  conda install -c conda-forge hdbscan==0.8.26
+# RUN apt-get install -y libx11-6
 
 WORKDIR "/app"
 
-## TODO remove reload in deployment
-#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--reload", "--port", "80"]
-#
+# TODO remove reload in deployment
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--reload", "--port", "80"]
 
+RUN pip install opencv-python==4.2.0.32
 
