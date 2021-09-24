@@ -1,6 +1,7 @@
 import os
 import subprocess
 import tempfile
+import warnings
 from typing import Optional
 
 from fastapi import FastAPI, UploadFile, File
@@ -19,7 +20,7 @@ class OCRResult(BaseModel):
          )
 async def name(
 ):
-    return {'message': "OCR: PERO-OCR-new micro-service."}
+    return {'msg': "OCR: PERO-OCR-new micro-service."}
 
 
 @app.post("/ocr/",
@@ -41,11 +42,16 @@ async def ocr_image(
         filename_xml = os.path.join(dirpath, 'page.xml')
         filename_txt = os.path.join(dirpath, 'page.txt')
 
-        subprocess.run(['python', '-m', 'scripts.run_foo',
+        proc = subprocess.run(['python', '-m', 'userscripts.run_ocr',
                         '-f', filename_image_tmp,
                         '-x', filename_xml,
                         '-t', filename_txt
                         ])
+
+        try:
+            proc.check_returncode()
+        except Exception as e:
+            warnings.warn(f"Userscript might have failed.\n{e}", UserWarning)
 
         with open(filename_xml) as f:
             xml = f.read()

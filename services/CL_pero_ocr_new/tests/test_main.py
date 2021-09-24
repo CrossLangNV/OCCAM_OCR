@@ -1,23 +1,13 @@
 import asyncio
 import os
 import unittest
-from fastapi.testclient import TestClient
 
 import requests
+from fastapi.testclient import TestClient
 
-if 1:
-    from ..main import app
+from main import app
 
-    client = TestClient(app)
-
-    def test_read_main():
-        response = client.get("/")
-        assert response.status_code == 200
-        assert response.json() == {"msg": "Hello World"}
-
-    test_read_main()
-
-elif 0:
+if 0:
     URL_HOME = 'http://192.168.105.41:9065'  # Turing
 else:
     URL_HOME = 'http://gpu1.crosslang.com:9065'  # GPU1
@@ -27,6 +17,96 @@ FILENAME_IMAGE2 = os.path.join(os.path.dirname(__file__), 'test image handwritte
 
 FILENAMES = [FILENAME_IMAGE,
              FILENAME_IMAGE2]
+
+
+class TestFastApi(unittest.TestCase):
+    OCR = '/ocr/'
+
+    def setUp(self) -> None:
+        self.client = TestClient(app)
+
+    def test_read_main(self):
+        response = self.client.get("/")
+        assert response.status_code == 200
+        with self.subTest('message'):
+            assert response.json() == {'msg': "OCR: PERO-OCR-new micro-service."}
+
+    def test_ocr_post_new(self):
+        with open(FILENAME_IMAGE, 'rb') as f:
+            files = {'image': f}
+
+            response = self.client.post(self.OCR,
+                                        files=files)
+
+        print(response.json())
+
+        self._assert_response(response)
+
+    # def test_post_multiple_in_series(self):
+    #
+    #     for filename_image in [FILENAME_IMAGE,
+    #                            FILENAME_IMAGE2,
+    #                            ]:
+    #         with open(filename_image, 'rb') as f:
+    #             files = {'image': f}
+    #             response = requests.post(self.URL,
+    #                                      files=files)
+    #
+    #         with self.subTest(str(filename_image)):
+    #             self._assert_response(response)
+    #
+    # def test_post_a_lot_in_series(self, n=5):
+    #     i = 0
+    #     for _ in range(n):
+    #         for filename_image in [FILENAME_IMAGE,
+    #                                FILENAME_IMAGE2,
+    #
+    #                                ]:
+    #             with open(filename_image, 'rb') as f:
+    #                 files = {'image': f}
+    #                 response = requests.post(self.URL,
+    #                                          files=files)
+    #
+    #             with self.subTest(f'Post {i}'):
+    #                 self._assert_response(response)
+    #
+    #             i += 1
+    #
+    # def test_post_in_parallel(self,
+    #                           n_loop=10  # TODO test higher number
+    #                           ):
+    #     """
+    #     While the API might be able to handle a single call. We should check if the API can handle multiple calls at once, mainly to check if the GPU memory can take it.
+    #
+    #     :return:
+    #     """
+    #
+    #     def func(self, i: int):
+    #         filename = FILENAMES[i % len(FILENAMES)]
+    #
+    #         with open(filename, 'rb') as f:
+    #             files = {'image': f}
+    #             response = requests.post(self.URL,
+    #                                      files=files)
+    #
+    #         self._assert_response(response, verbose=0)
+    #
+    #         print(f'Finished async {i}')
+    #
+    #     loop = asyncio.get_event_loop()
+    #
+    #     for i in range(n_loop):
+    #         loop.run_in_executor(None, func, self, i + 1)
+    #
+    def _assert_response(self, response, verbose=1):
+
+        json = response.json()
+
+        if verbose:
+            print(response.json().get('text'))
+
+        for key in ['name', 'xml', 'text']:
+            self.assertIn(key, json.keys())
 
 
 class TestAPI(unittest.TestCase):
@@ -106,83 +186,3 @@ class TestAPI(unittest.TestCase):
 
         for key in ['name', 'xml', 'text']:
             self.assertIn(key, json.keys())
-
-# class TestAPI2(unittest.TestCase):
-#     URL = URL_HOME + '/ocr2/'
-#
-#     def test_ocr_post(self):
-#
-#         with open(FILENAME_IMAGE, 'rb') as f:
-#             files = {'image': f}
-#             response = requests.post(self.URL,
-#                                      files=files)
-#
-#         print(response.json())
-#
-#         self._assert_response(response)
-#
-#     def test_post_multiple_in_series(self):
-#
-#         for filename_image in [FILENAME_IMAGE,
-#                                FILENAME_IMAGE2,
-#                                ]:
-#             with open(filename_image, 'rb') as f:
-#                 files = {'image': f}
-#                 response = requests.post(self.URL,
-#                                          files=files)
-#
-#             with self.subTest(str(filename_image)):
-#                 self._assert_response(response)
-#
-#     def test_post_a_lot_in_series(self, n=5):
-#         i = 0
-#         for _ in range(n):
-#             for filename_image in [FILENAME_IMAGE,
-#                                    FILENAME_IMAGE2,
-#
-#                                    ]:
-#                 with open(filename_image, 'rb') as f:
-#                     files = {'image': f}
-#                     response = requests.post(self.URL,
-#                                              files=files)
-#
-#                 with self.subTest(f'Post {i}'):
-#                     self._assert_response(response)
-#
-#                 i += 1
-#
-#     def test_post_in_parallel(self,
-#                               n_loop=10  # TODO test higher number
-#                               ):
-#         """
-#         While the API might be able to handle a single call. We should check if the API can handle multiple calls at once, mainly to check if the GPU memory can take it.
-#
-#         :return:
-#         """
-#
-#         def func(self, i: int):
-#             filename = FILENAMES[i % len(FILENAMES)]
-#
-#             with open(filename, 'rb') as f:
-#                 files = {'image': f}
-#                 response = requests.post(self.URL,
-#                                          files=files)
-#
-#             self._assert_response(response, verbose=0)
-#
-#             print(f'Finished async {i}')
-#
-#         loop = asyncio.get_event_loop()
-#
-#         for i in range(n_loop):
-#             loop.run_in_executor(None, func, self, i + 1)
-#
-#     def _assert_response(self, response, verbose=1):
-#
-#         json = response.json()
-#
-#         if verbose:
-#             print(response.json().get('text'))
-#
-#         for key in ['name', 'xml', 'text']:
-#             self.assertIn(key, json.keys())

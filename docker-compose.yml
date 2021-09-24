@@ -20,7 +20,7 @@ services:
   pero-ocr-new:
     build: services/CL_pero_ocr_new
     volumes:
-      - ./CL_pero_ocr_new:/app
+      - ./services/CL_pero_ocr_new:/app
     ports:
       - 9075:80
     env_file:
