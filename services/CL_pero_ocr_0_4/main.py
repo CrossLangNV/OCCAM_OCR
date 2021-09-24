@@ -15,9 +15,11 @@ class OCRResult(BaseModel):
     text: Optional[str] = None
 
 
-"""
-The model gets loaded with every call, by calling OCR as a user-scripts 
-"""
+@app.get("/",
+         )
+async def name(
+):
+    return {'message': "OCR: PERO-OCR-0.4 micro-service."}
 
 
 @app.post("/ocr/",
@@ -26,6 +28,10 @@ The model gets loaded with every call, by calling OCR as a user-scripts
 async def ocr_image(
         image: UploadFile = File(...)
 ):
+    """
+    The model gets loaded with every call, by calling OCR as a user-scripts
+    """
+
     filename = image.filename
 
     with tempfile.TemporaryDirectory() as dirpath:
