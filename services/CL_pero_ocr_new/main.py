@@ -4,7 +4,7 @@ import tempfile
 import warnings
 from typing import Optional
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -43,24 +43,28 @@ async def ocr_image(
         filename_txt = os.path.join(dirpath, 'page.txt')
 
         proc = subprocess.run(['python', '-m', 'userscripts.run_ocr',
-                        '-f', filename_image_tmp,
-                        '-x', filename_xml,
-                        '-t', filename_txt
-                        ])
+                               '-f', filename_image_tmp,
+                               '-x', filename_xml,
+                               '-t', filename_txt
+                               ])
 
         try:
             proc.check_returncode()
         except Exception as e:
             warnings.warn(f"Userscript might have failed.\n{e}", UserWarning)
 
-        with open(filename_xml) as f:
-            xml = f.read()
+        try:
+            with open(filename_xml) as f:
+                xml = f.read()
 
-        with open(filename_txt) as f:
-            text = f.read()
+            with open(filename_txt) as f:
+                text = f.read()
+        except Exception as e:
+            raise HTTPException(status_code=416, detail='Engine failed to generate outputs.\n'
+                                                        'Please contact an administrator.')
 
-    result = OCRResult(xml=xml,
-                       name=filename,
+    result = OCRResult(name=filename,
+                       xml=xml,
                        text=text)
 
     return result
