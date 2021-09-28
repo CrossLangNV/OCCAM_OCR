@@ -2,18 +2,12 @@ import os
 import subprocess
 import tempfile
 import warnings
-from typing import Optional
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from pydantic import BaseModel
+
+from src.models import OCRResult
 
 app = FastAPI()
-
-
-class OCRResult(BaseModel):
-    name: Optional[str] = None
-    xml: str
-    text: Optional[str] = None
 
 
 @app.get("/",

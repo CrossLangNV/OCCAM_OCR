@@ -1,35 +1,22 @@
-import configparser
 import os
 import unittest
 
-import cv2
 from pero_ocr.document_ocr.layout import PageLayout
 from pero_ocr.document_ocr.page_parser import PageParser
+
+from src.engine_parser import get_config
+from src.image_processing import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DIR_ENGINES = os.path.join(ROOT, 'engines')
 FILENAME_IMAGE = os.path.join(ROOT, 'tests/test image.jpg')
 
 
-def get_config(config_path):
-    assert os.path.exists(config_path)
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    return config
-
-
-def get_image(filename):
-    assert os.path.exists(filename)
-
-    img = cv2.imread(FILENAME_IMAGE)
-    return img
-
-
 class TestEngines(unittest.TestCase):
 
     def setUp(self) -> None:
         self.name = os.path.split(FILENAME_IMAGE)[-1]
-        self.img = get_image(FILENAME_IMAGE)
+        self.img = Image.from_path(FILENAME_IMAGE)
 
     def test_from_dir(self):
         dir_names = [o for o in os.listdir(DIR_ENGINES)

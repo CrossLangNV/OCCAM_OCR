@@ -38,7 +38,7 @@ class TestFastApi(unittest.TestCase):
             response = self.client.post(self.OCR,
                                         files=files)
 
-        print(response.json())
+        print(response.json()['text'])
 
         self._assert_response(response)
 
