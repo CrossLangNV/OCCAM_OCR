@@ -5,6 +5,7 @@ import unittest
 import requests
 from fastapi.testclient import TestClient
 
+from engines.available_engines import engines
 from main import app
 
 if 0:
@@ -20,10 +21,30 @@ FILENAMES = [FILENAME_IMAGE,
 
 
 class TestFastApi(unittest.TestCase):
+    ENGINES = '/engines'
     OCR = '/ocr/'
 
     def setUp(self) -> None:
         self.client = TestClient(app)
+        self.engines_truth = engines[:]
+
+    def test_get_engines(self):
+
+        response = self.client.get(self.ENGINES,
+                                   )
+
+        engines_get = response.json()
+
+        with self.subTest('Same number of engines'):
+            self.assertEqual(len(self.engines_truth), len(engines_get))
+
+        for engine_truth in self.engines_truth:
+            name = engine_truth.name
+
+            with self.subTest(name):
+                engine_get = next(filter(lambda engine_i: engine_i.get('name') == name, engines_get))
+
+                self.assertEqual(engine_get.get('id'), engine_truth.id)
 
     def test_read_main(self):
         response = self.client.get("/")
@@ -41,6 +62,27 @@ class TestFastApi(unittest.TestCase):
         print(response.json()['text'])
 
         self._assert_response(response)
+
+    def test_ocr_post_engine_id(self):
+
+        response = self.client.get(self.ENGINES,
+                                   )
+        engines_get = response.json()
+
+        for engine in engines_get[::-1]:
+            with self.subTest(engine['name']):
+                id = engine['id']
+
+                with open(FILENAME_IMAGE, 'rb') as f:
+                    files = {'image': f}
+
+                    response = self.client.post(self.OCR,
+                                                data={'engine_id': id},
+                                                files=files)
+
+                print(response.json()['text'])
+
+                self._assert_response(response)
 
     # def test_post_multiple_in_series(self):
     #

@@ -2,10 +2,12 @@ import os
 import subprocess
 import tempfile
 import warnings
+from typing import List
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 
-from src.models import OCRResult
+from engines.available_engines import engines
+from src.models import OCRResult, OCREngine
 
 app = FastAPI()
 
@@ -17,11 +19,19 @@ async def name(
     return {'msg': "OCR: PERO-OCR-new micro-service."}
 
 
+@app.get("/engines/",
+         response_model=List[OCREngine]
+         )
+async def get_engines():
+    return engines
+
+
 @app.post("/ocr/",
           response_model=OCRResult
           )
 async def ocr_image(
-        image: UploadFile = File(...)
+        image: UploadFile = File(...),
+        engine_id: int = 1,
 ):
     """
     The model gets loaded with every call, by calling OCR as a user-scripts
@@ -39,7 +49,8 @@ async def ocr_image(
         proc = subprocess.run(['python', '-m', 'userscripts.run_ocr',
                                '-f', filename_image_tmp,
                                '-x', filename_xml,
-                               '-t', filename_txt
+                               '-t', filename_txt,
+                               '-e', str(engine_id)
                                ])
 
         try:

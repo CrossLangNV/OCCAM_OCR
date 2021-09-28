@@ -10,4 +10,8 @@ class OCRResult(BaseModel):
 
 
 class OCREngine(BaseModel):
+    id: int
+    name: Optional[str] = None
+    folder: str  # Name of folder in "./engines/
+    config_file: Optional[str] = 'config.ini'
     pass
