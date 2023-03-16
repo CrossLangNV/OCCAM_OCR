@@ -20,7 +20,7 @@ The model gets loaded with every call, by calling OCR as a user-scripts
 """
 
 
-@app.post("/ocr/",
+@app.post("/ocr",
           response_model=OCRResult
           )
 async def ocr_image(
@@ -36,11 +36,12 @@ async def ocr_image(
         filename_xml = os.path.join(dirpath, 'page.xml')
         filename_txt = os.path.join(dirpath, 'page.txt')
 
-        subprocess.run(['python', '-m', 'scripts.run_foo',
+        a = subprocess.run(['python', '-m', 'scripts.run_foo',
                         '-f', filename_image_tmp,
                         '-x', filename_xml,
                         '-t', filename_txt
                         ])
+        assert a.returncode == 0, "OCR script failed"
 
         with open(filename_xml) as f:
             xml = f.read()

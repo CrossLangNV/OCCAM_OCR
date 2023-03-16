@@ -1,4 +1,4 @@
 # all model folders
-media/*/
+MEDIA/*/
 # All content in output_dir
 output_dir/*/

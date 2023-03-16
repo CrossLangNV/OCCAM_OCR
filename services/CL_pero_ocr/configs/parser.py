@@ -7,7 +7,7 @@ ROOT = os.path.join(os.path.dirname(__file__), '..')
 
 
 class settings:
-    MEDIA_ROOT = os.path.join(ROOT, 'media')
+    MEDIA_ROOT = os.path.join(ROOT, 'MEDIA')
     OUTPUT_DIR = os.path.join(ROOT, 'output_dir')
 
 

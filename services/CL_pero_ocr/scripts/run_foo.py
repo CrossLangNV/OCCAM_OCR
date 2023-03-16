@@ -35,7 +35,7 @@ def main(filename,
 
     id = os.path.split(filename)[-1]
 
-    if 0:
+    if 1:
         config = configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name)
         config_path= None
     elif 1:

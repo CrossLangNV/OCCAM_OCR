@@ -25,12 +25,10 @@ services:
       - ./services/CL_pero_ocr:/app
     ports:
       - 9065:80
-#    env_file:
-#      - ./secrets/occam.env
-    runtime: nvidia
-    environment:
-      - MODULE_NAME=main
-      - "DEVICE=cuda:0"
-      - "NVIDIA_VISIBLE_DEVICES=0"
-      # When using Turing, use second GPU
-      # - "NVIDIA_VISIBLE_DEVICES=1"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
