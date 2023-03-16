@@ -32,3 +32,10 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [ gpu ]
+    networks:
+      - occam_shared
+
+networks:
+  occam_shared:
+    name: occam_shared
+    external: true
