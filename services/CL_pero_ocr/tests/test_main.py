@@ -4,10 +4,31 @@ import unittest
 
 import requests
 
+
+class RequestsClient(requests.Session):
+    def __init__(self, base_url=None):
+        super().__init__()
+        self.base_url = base_url
+
+    def request(self, method, url, **kwargs):
+        url = self.base_url + url
+        return super().request(method, url, **kwargs)
+
+
 if 0:
-    URL_HOME = 'http://localhost:9065'  # Local
+    # FastAPI test client
+    from fastapi.testclient import TestClient
+    from main import app
+
+    client = TestClient(app)
 else:
-    URL_HOME = 'http://192.168.105.41:9065'  # GPU server
+    # Remote server
+    if 1:
+        URL_HOME = 'http://localhost:9065'  # Local
+    else:
+        URL_HOME = 'http://192.168.105.41:9065'  # GPU server
+    client = RequestsClient(URL_HOME)
+
 FILENAME_IMAGE = os.path.join(os.path.dirname(__file__), 'test image.jpg')
 FILENAME_IMAGE2 = os.path.join(os.path.dirname(__file__), 'test image handwritten.jpg')
 
@@ -16,14 +37,16 @@ FILENAMES = [FILENAME_IMAGE,
 
 
 class TestAPI(unittest.TestCase):
-    URL = URL_HOME + '/ocr'
+    url = '/ocr'
 
     def test_ocr_post(self):
 
         with open(FILENAME_IMAGE, 'rb') as f:
             files = {'image': f}
-            response = requests.post(self.URL,
-                                     files=files)
+            response = client.post(self.url,
+                                   files=files)
+
+        self.assertTrue(response.ok, [response, response.content])
 
         print(response.json())
 
@@ -37,8 +60,8 @@ class TestAPI(unittest.TestCase):
                                ]:
             with open(filename_image, 'rb') as f:
                 files = {'image': f}
-                response = requests.post(self.URL,
-                                         files=files)
+                response = client.post(self.url,
+                                       files=files)
 
             with self.subTest(str(filename_image)):
                 self._assert_response(response)
@@ -50,8 +73,8 @@ class TestAPI(unittest.TestCase):
 
             with open(filename_image, 'rb') as f:
                 files = {'image': f}
-                response = requests.post(self.URL,
-                                         files=files)
+                response = client.post(self.url,
+                                       files=files)
 
             with self.subTest(f'Post {i}'):
                 self._assert_response(response)
