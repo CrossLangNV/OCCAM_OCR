@@ -2,11 +2,13 @@ import os
 import subprocess
 import tempfile
 from typing import Optional
-
+import logging
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 
 app = FastAPI()
+
+logger = logging.getLogger(__name__)
 
 
 class OCRResult(BaseModel):
@@ -37,11 +39,13 @@ async def ocr_image(
         filename_txt = os.path.join(dirpath, 'page.txt')
 
         a = subprocess.run(['python', '-m', 'scripts.run_foo',
-                        '-f', filename_image_tmp,
-                        '-x', filename_xml,
-                        '-t', filename_txt
-                        ])
-        assert a.returncode == 0, "OCR script failed"
+                            '-f', filename_image_tmp,
+                            '-x', filename_xml,
+                            '-t', filename_txt
+                            ])
+        if a.returncode != 0:
+            logger.error("OCR script failed")
+            logger.info(a.stdout)
 
         with open(filename_xml) as f:
             xml = f.read()
