@@ -38,7 +38,7 @@ async def ocr_image(
         filename_xml = os.path.join(dirpath, 'page.xml')
         filename_txt = os.path.join(dirpath, 'page.txt')
 
-        a = subprocess.run(['python', '-m', 'scripts.run_foo',
+        a = subprocess.run(['python', '-m', 'scripts.run_pero_ocr_0_6_1',
                             '-f', filename_image_tmp,
                             '-x', filename_xml,
                             '-t', filename_txt

@@ -39,6 +39,11 @@ def main(filename,
         config = configuration_pero_ocr(image_folder_name, layout_model_name, ocr_model_name)
         config_path= None
     elif 1:
+        # 2022-11-18 model
+        config = configparser.ConfigParser()
+        config_path = os.path.join(ROOT, 'MEDIA/pero-printed_modern-public-2022-11-18/config.ini')
+        config.read(config_path)
+    elif 1:
         # test_layout_model + test_ocr_model
         config = configparser.ConfigParser()
         config_path = os.path.join(ROOT, 'configs/config_test.ini')
